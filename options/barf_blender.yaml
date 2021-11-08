@@ -1,8 +1,5 @@
 _parent_: options/nerf_blender.yaml
 
-arch:
-    load_init:
-
 barf_c2f:                                                   # coarse-to-fine scheduling on positional encoding
 
 camera:                                                     # camera options

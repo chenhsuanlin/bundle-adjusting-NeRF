@@ -241,12 +241,6 @@ class NeRF(nerf.NeRF):
     def __init__(self,opt):
         super().__init__(opt)
         self.progress = torch.nn.Parameter(torch.tensor(0.)) # use Parameter so it could be checkpointed
-        if opt.arch.load_init:
-            state_dict = torch.load(opt.arch.load_init,map_location=opt.device)
-            state_dict = util.get_child_state_dict(state_dict,"nerf")
-            self.mlp_feat.load_state_dict(util.get_child_state_dict(state_dict,"mlp_feat"))
-            self.mlp_rgb.load_state_dict(util.get_child_state_dict(state_dict,"mlp_rgb"))
-            print("loaded initial weights from {}".format(opt.arch.load_init))
 
     def positional_encoding(self,opt,input,L): # [B,...,N]
         input_enc = super().positional_encoding(opt,input,L=L) # [B,...,2NL]

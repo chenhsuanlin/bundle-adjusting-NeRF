@@ -182,3 +182,9 @@ def suppress(stdout=False,stderr=False):
         finally:
             if stdout: sys.stdout = old_stdout
             if stderr: sys.stderr = old_stderr
+
+def colorcode_to_number(code):
+    ords = [ord(c) for c in code[1:]]
+    ords = [n-48 if n<58 else n-87 for n in ords]
+    rgb = (ords[0]*16+ords[1],ords[2]*16+ords[3],ords[4]*16+ords[5])
+    return rgb

@@ -6,8 +6,6 @@ import torchvision
 import torchvision.transforms.functional as torchvision_F
 import tqdm
 from easydict import EasyDict as edict
-import skvideo.io
-import PIL.Image
 
 import lpips
 from external.pohsun_ssim import pytorch_ssim
