@@ -6,9 +6,10 @@ and [Simon Lucey](http://ci2cv.net/people/simon-lucey/)
 IEEE International Conference on Computer Vision (ICCV), 2021 (**oral presentation**) 
 
 Project page: https://chenhsuanlin.bitbucket.io/bundle-adjusting-NeRF  
+Paper: https://chenhsuanlin.bitbucket.io/bundle-adjusting-NeRF/paper.pdf  
 arXiv preprint: https://arxiv.org/abs/2104.06405  
 
-We provide PyTorch code for the NeRF experiments on both synthetic (Blender) and real-world (LLFF) datasets.
+We provide PyTorch code for all experiments: planar image alignment, NeRF/BARF on both synthetic (Blender) and real-world (LLFF) datasets, and a template for BARFing on your custom sequence.
 
 --------------------------------------
 
@@ -46,7 +47,11 @@ For convenience, you can download them with the following script: (under this re
   ```
   The `data` directory should contain the subdirectories `blender` and `llff`.
   If you already have the datasets downloaded, you can alternatively soft-link them within the `data` directory.
-- #### <span style="color:red">iPhone (TODO)</span>
+
+- #### <span style="color:red">Test your own sequence!</span>
+  If you want to try BARF on your own sequence, we provide a template data file in `data/iphone.py`, which is an example to read from a sequence captured by an iPhone 12.
+  You should modify `get_image()` to read each image sample and set the raw image sizes (`self.raw_H`, `self.raw_W`) and focal length (`self.focal`) according to your camera specs.  
+  You may ignore the camera poses as they are assumed unknown in this case, which we simply set to zero vectors.
 
 --------------------------------------
 
@@ -88,6 +93,19 @@ For convenience, you can download them with the following script: (under this re
   If you wish to replicate the results from the original NeRF paper, use `--yaml=nerf_blender_repr` or `--yaml=nerf_llff_repr` instead for Blender or LLFF respectively.
   There are some differences, e.g. NDC will be used for the LLFF forward-facing dataset.
   (The reference NeRF models considered in the paper do not use NDC to parametrize the 3D points.)
+
+- #### Planar image alignment experiment
+  If you want to try the planar image alignment experiment, run:
+  ```bash
+  python3 train.py --group=<GROUP> --model=planar --yaml=planar --name=<NAME> --seed=3 --barf_c2f=[0,0.4]
+  ```
+  This will fit a neural image representation to a single image (default to `data/cat.jpg`), which takes a couple of minutes to optimize on a modern GPU.
+  The seed number is set to reproduce the pre-generated warp perturbations in the paper.
+  For the baseline methods, modify the arguments similarly as in the NeRF case above:
+  - Full positional encoding: omit the `--barf_c2f` argument.
+  - No positional encoding: add `--arch.posenc!`.
+
+  A video `vis.mp4` will also be created to visualize the optimization process.
 
 - #### Visualizing the results
   We have included code to visualize the training over TensorBoard and Visdom.
