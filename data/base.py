@@ -107,6 +107,7 @@ class Dataset(torch.utils.data.Dataset):
         return image
 
     def preprocess_camera(self,opt,intr,pose,aug=None):
+        intr,pose = intr.clone(),pose.clone()
         # center crop
         intr[0,2] -= (self.raw_W-self.crop_W)/2
         intr[1,2] -= (self.raw_H-self.crop_H)/2
