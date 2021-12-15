@@ -6,24 +6,29 @@ import importlib
 import options
 from util import log
 
-log.process(os.getpid())
-log.title("[{}] (PyTorch code for evaluating NeRF/BARF)".format(sys.argv[0]))
+def main():
 
-opt_cmd = options.parse_arguments(sys.argv[1:])
-opt = options.set(opt_cmd=opt_cmd)
+    log.process(os.getpid())
+    log.title("[{}] (PyTorch code for evaluating NeRF/BARF)".format(sys.argv[0]))
 
-with torch.cuda.device(opt.device):
+    opt_cmd = options.parse_arguments(sys.argv[1:])
+    opt = options.set(opt_cmd=opt_cmd)
 
-    model = importlib.import_module("model.{}".format(opt.model))
-    m = model.Model(opt)
+    with torch.cuda.device(opt.device):
 
-    m.load_dataset(opt,eval_split="test")
-    m.build_networks(opt)
+        model = importlib.import_module("model.{}".format(opt.model))
+        m = model.Model(opt)
 
-    if opt.model=="barf":
-        m.generate_videos_pose(opt)
+        m.load_dataset(opt,eval_split="test")
+        m.build_networks(opt)
 
-    m.restore_checkpoint(opt)
-    if opt.data.dataset in ["blender","llff"]:
-        m.evaluate_full(opt)
-    m.generate_videos_synthesis(opt)
+        if opt.model=="barf":
+            m.generate_videos_pose(opt)
+
+        m.restore_checkpoint(opt)
+        if opt.data.dataset in ["blender","llff"]:
+            m.evaluate_full(opt)
+        m.generate_videos_synthesis(opt)
+
+if __name__ == '__main__':
+    main()
