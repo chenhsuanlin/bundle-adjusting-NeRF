@@ -80,6 +80,8 @@ class Dataset(base.Dataset):
         image = self.images[idx] if opt.data.preload else self.get_image(opt,idx)
         image = self.preprocess_image(opt,image,aug=aug)
         intr,pose = self.cameras[idx] if opt.data.preload else self.get_camera(opt,idx)
+        intr = intr.detach().clone()
+        pose = pose.detach().clone()
         intr,pose = self.preprocess_camera(opt,intr,pose,aug=aug)
         sample.update(
             image=image,
