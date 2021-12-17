@@ -38,6 +38,70 @@ def parse_arguments(args):
     opt_cmd = edict(opt_cmd)
     return opt_cmd
 
+def parse_arguments_azureml(args):
+    """
+    Parse arguments from command line.
+    Syntax: --key1.key2.key3=value    --> value
+            --key1.key2.key3=         --> None
+            --key1.key2.key3!         --> False
+            [--key1.key2.key3, value] --> --key1.key2.key3=value
+            value                     --> --data.root=value
+    Compared to the original argument parser, this parser additionally accepts
+    1) pairs of --key, value in a list and  2) a standalone value, assumed to be 
+    the data root path.
+    
+    1) AzureML provides functionality for sampling parameters, useful for hyperparameter
+    search or training on multiple datasets. The sampled parameters for the single run
+    are passed as arguments to the training script in the form of a list 
+    [--key1, value1, --key, value]. The argument parser resolves them into 
+    [--key1=value1, --key2=value2] to be compatible with the original code.
+    
+    2) AzureML requires the path to the datastore to be passed as a Datapath object,
+    which is resolved to a string in the cloud. As a result, the argument passed
+    to the dataparser is a path string, without the usual format of --key=value. 
+    Argument parser resolves this into --data.root=value if the value is not preceded
+    by a --key in the list of arguments.
+    """
+    opt_cmd = {}
+    except_count = 0
+    arg_idx = 0
+    # Iterate through all elements in the argument list
+    while arg_idx<len(args):
+        # First try to pass the argument as in the default argument parser
+        arg=args[i]
+        try:    
+            assert(arg.startswith("--"))
+        except:
+            # Exception above means that value was passed on its own,
+            # without a preceding --key. This is assumed to be the data root.
+            assert(except_count==0)
+            arg = "--data.root="+str(arg)
+            # Keep track of exception count to assert only one value is passed
+            # in this manner.
+            except_count+=1
+        if "=" not in arg[2:]:
+            if arg[-1]=="!": 
+                key_str,value = (arg[2:-1],"false") 
+            else:
+                # Lack of the "=" sign is assumed to mean that the following 
+                # element in the argument list is the value corresponding to the key
+                key_str,value = (arg[2:], args[arg_idx+1])
+                # skip processing the following element (it has just been used as 
+                # the value for the key)
+                arg_idx+=1
+        else:
+            key_str,value = arg[2:].split("=")
+        keys_sub = key_str.split(".")
+        opt_sub = opt_cmd
+        for k in keys_sub[:-1]:
+            if k not in opt_sub: opt_sub[k] = {}
+            opt_sub = opt_sub[k]
+        assert keys_sub[-1] not in opt_sub,keys_sub[-1]
+        opt_sub[keys_sub[-1]] = yaml.safe_load(value)
+        arg_idx+=1
+    opt_cmd = edict(opt_cmd)
+    return opt_cmd
+
 def set(opt_cmd={}):
     log.info("setting configurations...")
     assert("model" in opt_cmd)
