@@ -21,6 +21,11 @@ It is recommended use [Anaconda](https://www.anaconda.com/products/individual) t
 conda env create --file requirements.yaml python=3
 conda activate barf-env
 ```
+If you plan to use the infrastructure to train on AzureML, please install with the other requirement file.
+```bash
+conda env create --file requirements_azureml.yaml python=3
+conda activate barf-env
+```
 Initialize the external submodule dependencies with
 ```bash
 git submodule update --init --recursive
