@@ -1,0 +1,30 @@
+{
+    "subscription_id": "{your subscription id}",
+    "resource_group": "{your resource group}",
+    "workspace_name": "{your workspace name}",
+    "datastore": "{your datastore}",
+    "data_dir": "{path to the root of your data on the datastore}",
+    "compute_name": "{your compute name}",
+
+    "experiment_name": "barf",
+    "entry_script": "train_azureml.py",
+
+    "node_count": 1,
+    "max_total_runs": 32,
+    "primary_metric_name": "error_t",
+
+    "script_args": [
+        "--group=group", 
+        "--model=barf", 
+        "--yaml=barf_blender", 
+        "--name=baseline", 
+        "--output_root=./outputs",
+        "--barf_c2f=[0.1,0.5]",
+        "--visdom!"
+    ],
+
+    "param_sampling": {
+        "--data.scene": "choice('{scene_1}', '{scene_2}', '{scene_3}')"
+    }
+
+}
