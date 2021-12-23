@@ -120,8 +120,13 @@ For convenience, you can download them with the following script: (under this re
   The Visdom host server is default to `localhost`; this can be overridden with `--visdom.server` (see `options/base.yaml` for details).
   If you want to disable Visdom visualization, add `--visdom!`.
 
---------------------------------------
+  The `extract_mesh.py` script provides a simple way to extract the underlying
+  geometry using marching cubes. Run as follows:
 
+  ```bash
+  python3 evaluate_mesh_clean.py --group=<GROUP> --model=barf --yaml=barf_blender --name=<NAME> --data.scene=<SCENE> --data.val_sub= --resume
+  ```
+--------------------------------------
 ### Codebase structure
 
 The main engine and network architecture in `model/barf.py` inherit those from `model/nerf.py`.
