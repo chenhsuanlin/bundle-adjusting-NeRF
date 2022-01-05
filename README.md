@@ -15,6 +15,8 @@ We provide PyTorch code for all experiments: planar image alignment, NeRF/BARF o
 
 ### Prerequisites
 
+- Note: for Azure ML support for this repository, please consider checking out [this branch](https://github.com/szymanowiczs/bundle-adjusting-NeRF/tree/azureml_training_script) by Stan Szymanowicz.
+
 This code is developed with Python3 (`python3`). PyTorch 1.9+ is required.  
 It is recommended use [Anaconda](https://www.anaconda.com/products/individual) to set up the environment. Install the dependencies and activate the environment `barf-env` with
 ```bash
@@ -118,8 +120,13 @@ For convenience, you can download them with the following script: (under this re
   The Visdom host server is default to `localhost`; this can be overridden with `--visdom.server` (see `options/base.yaml` for details).
   If you want to disable Visdom visualization, add `--visdom!`.
 
---------------------------------------
+  The `extract_mesh.py` script provides a simple way to extract the underlying 3D geometry using marching cubes. Run as follows:
+  ```bash
+  python3 extract_mesh.py --group=<GROUP> --model=barf --yaml=barf_blender --name=<NAME> --data.scene=<SCENE> --data.val_sub= --resume
+  ```
+  This works for both BARF and the original NeRF (by modifying the command line accordingly). This is currently supported only for the Blender dataset.
 
+--------------------------------------
 ### Codebase structure
 
 The main engine and network architecture in `model/barf.py` inherit those from `model/nerf.py`.

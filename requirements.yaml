@@ -16,8 +16,10 @@ dependencies:
   - visdom
   - matplotlib
   - scikit-video
+  - trimesh
   - pyyaml
   - pip
   - gdown
   - pip:
     - lpips
+    - pymcubes
