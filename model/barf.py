@@ -60,6 +60,12 @@ class Model(nerf.Model):
         return loss
 
     @torch.no_grad()
+    def validate(self,opt,ep=None):
+        pose,pose_GT = self.get_all_training_poses(opt)
+        _,self.graph.sim3 = self.prealign_cameras(opt,pose,pose_GT)
+        super().validate(opt,ep=ep)
+
+    @torch.no_grad()
     def log_scalars(self,opt,var,loss,metric=None,step=0,split="train"):
         super().log_scalars(opt,var,loss,metric=metric,step=step,split=split)
         if split=="train":
@@ -221,7 +227,7 @@ class Graph(nerf.Graph):
             var.se3_refine = self.se3_refine.weight[var.idx]
             pose_refine = camera.lie.se3_to_SE3(var.se3_refine)
             pose = camera.pose.compose([pose_refine,pose])
-        elif mode in ["eval","test-optim"]:
+        elif mode in ["val","eval","test-optim"]:
             # align test pose to refined coordinate system (up to sim3)
             sim3 = self.sim3
             center = torch.zeros(1,1,3,device=opt.device)
@@ -231,7 +237,7 @@ class Graph(nerf.Graph):
             t_aligned = (-R_aligned@center_aligned[...,None])[...,0]
             pose = camera.pose(R=R_aligned,t=t_aligned)
             # additionally factorize the remaining pose imperfection
-            if opt.optim.test_photo:
+            if opt.optim.test_photo and mode!="val":
                 pose = camera.pose.compose([var.pose_refine_test,pose])
         else: pose = var.pose
         return pose
