@@ -9,26 +9,26 @@ from util import log
 def main():
 
     log.process(os.getpid())
-    log.title("[{}] (PyTorch code for training NeRF/BARF)".format(sys.argv[0]))
-    #print(sys.argv)
+    log.title("[{}] (PyTorch code for evaluating NeRF/BARF)".format(sys.argv[0]))
 
     opt_cmd = options.parse_arguments(sys.argv[1:])
-    #print(opt_cmd)
     opt = options.set(opt_cmd=opt_cmd)
-    options.save_options_file(opt)
 
     with torch.cuda.device(opt.device):
 
         model = importlib.import_module("model.{}".format(opt.model))
         m = model.Model(opt)
 
-        m.load_dataset(opt)
+        m.load_dataset(opt,eval_split="train")
         m.build_networks(opt)
-        m.setup_optimizer(opt)
-        m.restore_checkpoint(opt)
-        m.setup_visualizer(opt)
 
-        m.train(opt)
+        if opt.model=="barf":
+            m.generate_videos_pose(opt)
+
+        m.restore_checkpoint(opt)
+        if opt.data.dataset in ["blender","llff","freiburg_cars"]:
+            m.evaluate_full(opt)
+        m.generate_videos_synthesis(opt)
 
 if __name__=="__main__":
     main()

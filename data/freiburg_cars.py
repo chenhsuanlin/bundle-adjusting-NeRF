@@ -10,31 +10,69 @@ from easydict import EasyDict as edict
 import json
 import pickle
 
-#from . import base
-import base
-
+from . import base
+#import base
 import camera
 from util import log,debug
+import json
 
 class Dataset(base.Dataset):
 
-    def __init__(self,opt,split="train",subset=None):
-        self.raw_H,self.raw_W = 3024,4032
+    def __init__(self,opt, split="train", subset=None):
+        self.raw_H,self.raw_W = 90, 160
         super().__init__(opt,split)
-        self.root = opt.data.root or "data/llff"
+        self.root = opt.data.root or "data/freiburg_cars"
         self.path = "{}/{}".format(self.root,opt.data.scene)
-        self.path_image = "{}/images".format(self.path)
+        self.path_image = "{}/images_6".format(self.path)
         image_fnames = sorted(os.listdir(self.path_image))
         poses_raw,bounds = self.parse_cameras_and_bounds(opt)
         self.list = list(zip(image_fnames,poses_raw,bounds))
+        #print('root', 'path', self.root, self.path, len(self.list))
+        
+        # only use train split
+        train_test_split_path = os.path.join(self.path, 'train_test_splits.json') 
+        train_idxs, test_idxs = self.get_train_test_idxs(train_test_split_path)
+        self.list = list(np.array(self.list)[train_idxs]) if split=='train' else list(np.array(self.list)[test_idxs])
+        
         # manually split train/val subsets
-        num_val_split = int(len(self)*opt.data.val_ratio)
-        self.list = self.list[:-num_val_split] if split=="train" else self.list[-num_val_split:]
+        # validation - the term may be slightly different from the original one
+        # num_val_split = int(len(self)*opt.data.val_ratio)
+        # self.list = self.list if split=="train" else self.list[-num_val_split:]
         if subset: self.list = self.list[:subset]
         # preload dataset
+        print(opt.data.preload)
         if opt.data.preload:
             self.images = self.preload_threading(opt,self.get_image)
             self.cameras = self.preload_threading(opt,self.get_camera,data_str="cameras")
+        
+#             if split =='train':
+#                 self.images = list(np.array(self.images)[train_idxs])
+#                 self.cameras = list(np.array(self.cameras, dtype=object)[train_idxs])
+#             else:
+#                 print(np.array(self.images).shape, test_idxs.shape)
+#                 self.images = list(np.array(self.images)[test_idxs])
+#                 self.cameras = list(np.array(self.cameras, dtype=object)[test_idxs])
+#             #print(len(self.images), len(self.cameras), self.images[0], self.cameras[0])
+            
+    
+    def get_train_test_idxs(self, train_test_split_path):
+        with open(train_test_split_path, 'r') as f:
+            splits = json.load(f)
+            total = splits['train'] + splits['test']
+            total = np.sort(total)
+            trains, tests = [], []
+            for num, t in enumerate(total):
+                if t in splits['train']:
+                    trains.append(num)
+                else:
+                    tests.append(num)
+            train_idxs = np.arange(len(trains)+len(tests))[trains]
+            test_idxs = train_idxs[::30]
+            train_idxs = np.array([j for j in range(len(train_idxs)) if j % 30 != 0])
+            
+            #test_idxs = np.arange(len(trains)+len(tests))[tests]
+            return train_idxs, test_idxs
+            
 
     def prefetch_all_data(self,opt):
         assert(not opt.data.augment)
@@ -49,7 +87,8 @@ class Dataset(base.Dataset):
         poses_raw = cam_data[...,:4] # [N,3,4]
         poses_raw[...,0],poses_raw[...,1] = poses_raw[...,1],-poses_raw[...,0]
         raw_H,raw_W,self.focal = cam_data[0,:,-1]
-        assert(self.raw_H==raw_H and self.raw_W==raw_W)
+        #assert(self.raw_H==raw_H and self.raw_W==raw_W)
+        self.focal = self.focal * self.raw_H / raw_H
         # parse depth bounds
         bounds = data[:,-2:] # [N,2]
         scale = 1./(bounds.min()*0.75) # not sure how this was determined

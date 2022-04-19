@@ -26,7 +26,7 @@ def main():
             m.generate_videos_pose(opt)
 
         m.restore_checkpoint(opt)
-        if opt.data.dataset in ["blender","llff"]:
+        if opt.data.dataset in ["blender","llff","freiburg_cars"]:
             m.evaluate_full(opt)
         m.generate_videos_synthesis(opt)
 

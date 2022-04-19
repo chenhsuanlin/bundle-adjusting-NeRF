@@ -26,6 +26,8 @@ class Model():
         log.info("loading training data...")
         self.train_data = data.Dataset(opt,split="train",subset=opt.data.train_sub)
         self.train_loader = self.train_data.setup_loader(opt,shuffle=True)
+        # train dataset returns a dictionary which has 4 keys
+        # idx, image, intr, pose
         log.info("loading test data...")
         if opt.data.val_on_test: eval_split = "test"
         self.test_data = data.Dataset(opt,split=eval_split,subset=opt.data.val_sub)

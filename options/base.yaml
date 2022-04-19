@@ -5,7 +5,7 @@ name: debug                                                 # name of experiment
 model:                                                      # type of model (must be specified from command line)
 yaml:                                                       # config file (must be specified from command line)
 seed: 0                                                     # seed number (for both numpy and pytorch)
-gpu: 0                                                      # GPU index number
+gpu: 1                                                      # GPU index number
 cpu: false                                                  # run only on CPU (not supported now)
 load:                                                       # load checkpoint from filename
 
