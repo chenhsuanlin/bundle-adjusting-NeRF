@@ -57,16 +57,39 @@ class Dataset(base.Dataset):
         poses_raw = self.center_camera_poses(opt,poses_raw)
         return poses_raw,bounds
 
+    # norm of v0 is not necessarily 1, even though norms of v1 and v2 are 1
+    # so det(pose_avg) is not necessarily 1
+    # which means that it is not SO(3)
+    # please see https://github.com/bmild/nerf/issues/34
+    # also refer to https://github.com/kwea123/nerf_pl/blob/master/datasets/llff.py
+
+    # original implementation
+    # def center_camera_poses(self,opt,poses):
+    #     # compute average pose
+    #     center = poses[...,3].mean(dim=0)
+    #     v1 = torch_F.normalize(poses[...,1].mean(dim=0),dim=0)
+    #     v2 = torch_F.normalize(poses[...,2].mean(dim=0),dim=0)
+    #     v0 = v1.cross(v2)
+    #     pose_avg = torch.stack([v0,v1,v2,center],dim=-1)[None] # [1,3,4]
+    #     # apply inverse of averaged pose
+    #     poses = camera.pose.compose([poses,camera.pose.invert(pose_avg)])
+    #     return poses
+
+    # new implementation
     def center_camera_poses(self,opt,poses):
         # compute average pose
         center = poses[...,3].mean(dim=0)
-        v1 = torch_F.normalize(poses[...,1].mean(dim=0),dim=0)
-        v2 = torch_F.normalize(poses[...,2].mean(dim=0),dim=0)
-        v0 = v1.cross(v2)
-        pose_avg = torch.stack([v0,v1,v2,center],dim=-1)[None] # [1,3,4]
+        vz = torch_F.normalize(poses[...,2].mean(dim=0),dim=0)
+        vy_hat = poses[..., 1].mean(dim=0)
+        # in the original implementation, v0
+        vx = torch_F.normalize(vy_hat.cross(vz), dim=0)
+        vy = vz.cross(vx)
+        pose_avg = torch.stack([vx,vy,vz,center],dim=-1)[None] # [1,3,4]
         # apply inverse of averaged pose
         poses = camera.pose.compose([poses,camera.pose.invert(pose_avg)])
         return poses
+
+
 
     def get_all_camera_poses(self,opt):
         pose_raw_all = [tup[1] for tup in self.list]
