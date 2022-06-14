@@ -231,12 +231,9 @@ class Graph(base.Graph):
 
     def render(self,opt,pose,intr=None,ray_idx=None,mode=None):
         batch_size = len(pose)
-        center,ray = camera.get_center_and_ray(opt,pose,intr=intr) # [B,HW,3]
+        center,ray = camera.get_center_and_ray(opt,pose,intr=intr,ray_idx=ray_idx) # [B,HW,3]
         while ray.isnan().any(): # TODO: weird bug, ray becomes NaN arbitrarily if batch_size>1, not deterministic reproducible
-            center,ray = camera.get_center_and_ray(opt,pose,intr=intr) # [B,HW,3]
-        if ray_idx is not None:
-            # consider only subset of rays
-            center,ray = center[:,ray_idx],ray[:,ray_idx]
+            center,ray = camera.get_center_and_ray(opt,pose,intr=intr,ray_idx=ray_idx) # [B,HW,3]
         if opt.camera.ndc:
             # convert center/ray representations to NDC
             center,ray = camera.convert_NDC(opt,center,ray,intr=intr)
