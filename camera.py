@@ -157,14 +157,14 @@ class Quaternion():
         R10,R11,R12 = row1.unbind(dim=-1)
         R20,R21,R22 = row2.unbind(dim=-1)
         t = R[...,0,0]+R[...,1,1]+R[...,2,2]
-        r = (1+t+eps).sqrt()
+        r = (1+t).sqrt()
         qa = 0.5*r
-        qb = (R21-R12).sign()*0.5*(1+R00-R11-R22+eps).sqrt()
-        qc = (R02-R20).sign()*0.5*(1-R00+R11-R22+eps).sqrt()
-        qd = (R10-R01).sign()*0.5*(1-R00-R11+R22+eps).sqrt()
+        qb = (R21-R12).sign()*0.5*(1+R00-R11-R22).sqrt()
+        qc = (R02-R20).sign()*0.5*(1-R00+R11-R22).sqrt()
+        qd = (R10-R01).sign()*0.5*(1-R00-R11+R22).sqrt()
         q = torch.stack([qa,qb,qc,qd],dim=-1)
         for i,qi in enumerate(q):
-            if torch.isnan(qi).any():
+            if torch.isnan(qi).any() or not torch.any(qi):
                 K = torch.stack([torch.stack([R00-R11-R22,R10+R01,R20+R02,R12-R21],dim=-1),
                                  torch.stack([R10+R01,R11-R00-R22,R21+R12,R20-R02],dim=-1),
                                  torch.stack([R20+R02,R21+R12,R22-R00-R11,R01-R10],dim=-1),
