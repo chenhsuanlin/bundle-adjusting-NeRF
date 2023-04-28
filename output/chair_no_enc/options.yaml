@@ -1,0 +1,111 @@
+H: 400
+W: 400
+arch:
+    density_activ: softplus
+    layers_feat:
+    - null
+    - 256
+    - 256
+    - 256
+    - 256
+    - 256
+    - 256
+    - 256
+    - 256
+    layers_rgb:
+    - null
+    - 128
+    - 3
+    posenc: false
+    skip:
+    - 4
+    tf_init: true
+barf_c2f:
+- 0.1
+- 0.5
+batch_size: null
+camera:
+    model: perspective
+    ndc: false
+    noise: 0.15
+cpu: false
+data:
+    augment: {}
+    bgcolor: 1
+    center_crop: null
+    dataset: blender
+    image_size:
+    - 400
+    - 400
+    num_workers: 4
+    preload: true
+    root: null
+    scene: chair
+    train_sub: null
+    val_on_test: false
+    val_sub: 4
+device: cuda:0
+freq:
+    ckpt: 5000
+    scalar: 200
+    val: 2000
+    vis: 1000
+gpu: 0
+group: groupNoEncoding
+load: null
+loss_weight:
+    render: 0
+    render_fine: null
+max_epoch: null
+max_iter: 200000
+model: barf
+name: chair
+nerf:
+    density_noise_reg: null
+    depth:
+        param: metric
+        range:
+        - 2
+        - 6
+    fine_sampling: false
+    rand_rays: 1024
+    sample_intvs: 128
+    sample_intvs_fine: null
+    sample_stratified: true
+    setbg_opaque: false
+    view_dep: true
+optim:
+    algo: Adam
+    lr: 0.0005
+    lr_end: 0.0001
+    lr_pose: 0.001
+    lr_pose_end: 1.0e-05
+    sched:
+        gamma: null
+        type: ExponentialLR
+    sched_pose:
+        gamma: null
+        type: ExponentialLR
+    test_iter: 100
+    test_photo: true
+    warmup_pose: null
+output_path: output/groupNoEncoding/chair
+output_root: output
+resume: false
+seed: 0
+tb:
+    num_images:
+    - 4
+    - 8
+trimesh:
+    chunk_size: 16384
+    range:
+    - -1.2
+    - 1.2
+    res: 128
+    thres: 25.0
+visdom:
+    cam_depth: 0.5
+    port: 9000
+    server: localhost
+yaml: barf_blender
